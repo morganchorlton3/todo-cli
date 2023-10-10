@@ -1,7 +1,6 @@
 from time import strftime
 
 from cement import Controller, ex
-from todoist_api_python.api import TodoistAPI
 
 class Items(Controller):
     class Meta:
@@ -12,7 +11,14 @@ class Items(Controller):
     @ex(help='list items')
     def list(self):
         data = {}
-        data['items'] = self.app.db.all()
+        try:
+            project = self.app.config.get('todo', 'todoist_selected_project')
+            tasks = self.app.todoist.get_tasks(project_id=project)
+            data['tasks'] = tasks
+
+        except Exception as error:
+            self.app.log.error(error)
+
         self.app.render(data, 'items/list.jinja2')
 
     @ex(
@@ -25,16 +31,14 @@ class Items(Controller):
     )
     def create(self):
         text = self.app.pargs.item_text
-        now = strftime("%Y-%m-%d %H:%M:%S")
-        self.app.log.info('creating todo item: %s' % text)
-
-        item = {
-            'timestamp': now,
-            'state': 'pending',
-            'text': text,
-        }
-
-        self.app.db.insert(item)
+        try:
+            task = self.app.todoist.add_task(
+                content=text,
+                priority=1,
+            )
+            self.app.log.info(task)
+        except Exception as error:
+            self.app.log.error(error)
 
     @ex(
         help='update an existing item',
