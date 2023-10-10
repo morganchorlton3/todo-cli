@@ -1,33 +1,54 @@
+import os
 
 from cement import App, TestApp, init_defaults
 from cement.core.exc import CaughtSignal
+from cement.utils import fs, shell
 
 from .controllers.items import Items
 from .core.exc import TodoError
 from .controllers.base import Base
 
-import os
-from tinydb import TinyDB
-from cement.utils import fs
+from todoist_api_python.api import TodoistAPI
+
 
 # configuration defaults
 CONFIG = init_defaults('todo')
-CONFIG['todo']['db_file'] = '~/.todo/db.json'
-CONFIG['todo']['email'] = 'morganchorlton3@gmail.com'
+CONFIG['todo']['todoist_api_key_path'] = '~/.todo/key.txt'
 
+def collect_api_key(key_file: str) -> str:
+    p = shell.Prompt("Please enter your Todoist API key: ")
+    key = p.prompt()
+    f = open(key_file, "a")
+    f.truncate(0)
+    f.write(key)
+    f.close()
+    return key
 
 def extend_tinydb(app):
-    db_file = app.config.get('todo', 'db_file')
+    key_file = app.config.get('todo', 'todoist_api_key_path')
 
     # ensure that we expand the full path
-    db_file = fs.abspath(db_file)
+    key_file = fs.abspath(key_file)
 
-    # ensure our parent directory exists
-    db_dir = os.path.dirname(db_file)
-    if not os.path.exists(db_dir):
-        os.makedirs(db_dir)
+    if os.path.isfile(key_file):
+        f = open(key_file, "r")
+        key = f.read()
+    else:
+        key = collect_api_key(key_file)
 
-    app.extend('db', TinyDB(db_file))
+    authenticated = False
+    while not authenticated:
+        app.log.info(key)
+        api = TodoistAPI(key)
+        try:
+            projects = api.get_projects()
+            app.log.info(projects)
+            authenticated = True
+            app.extend('todoist', api)
+        except Exception as error:
+            app.log.error(error)
+            key = collect_api_key(key_file)
+
 
 class Todo(App):
     """Todo CLI primary application."""

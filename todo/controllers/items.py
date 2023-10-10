@@ -1,7 +1,7 @@
 from time import strftime
 
 from cement import Controller, ex
-
+from todoist_api_python.api import TodoistAPI
 
 class Items(Controller):
     class Meta:
