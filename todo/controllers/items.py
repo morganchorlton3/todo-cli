@@ -9,13 +9,11 @@ class Items(Controller):
         stacked_type = 'embedded'
         stacked_on = 'base'
 
-
     @ex(help='list items')
     def list(self):
         data = {}
         data['items'] = self.app.db.all()
         self.app.render(data, 'items/list.jinja2')
-
 
     @ex(
         help='create an item',
@@ -41,13 +39,21 @@ class Items(Controller):
     @ex(
         help='update an existing item',
         arguments=[
-            (['item_id'],
-             {'help': 'todo item database id',
-              'action': 'store'}),
-            (['--text'],
-             {'help': 'todo item text',
-              'action': 'store',
-              'dest': 'item_text'}),
+            (
+                    ['item_id'],
+                    {
+                        'help': 'todo item database id',
+                        'action': 'store'
+                    }
+            ),
+            (
+                    ['--text'],
+                    {
+                        'help': 'todo item text',
+                        'action': 'store',
+                        'dest': 'item_text'
+                    }
+            ),
         ],
     )
     def update(self):
@@ -63,10 +69,22 @@ class Items(Controller):
 
         self.app.db.update(item, doc_ids=[id])
 
-
-    @ex(help='delete an item')
+    @ex(
+        help='delete an item',
+        arguments=[
+            (
+                    ['item_id'],
+                    {
+                        'help': 'todo item database id',
+                        'action': 'store'
+                    }
+            ),
+        ],
+    )
     def delete(self):
-        pass
+        id = int(self.app.pargs.item_id)
+        self.app.log.info('deleting todo item id: %s' % id)
+        self.app.db.remove(doc_ids=[id])
 
     @ex(
         help='complete an item',
