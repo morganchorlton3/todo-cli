@@ -1,6 +1,8 @@
 
 from cement import App, TestApp, init_defaults
 from cement.core.exc import CaughtSignal
+
+from .controllers.items import Items
 from .core.exc import TodoError
 from .controllers.base import Base
 
@@ -61,7 +63,8 @@ class Todo(App):
 
         # register handlers
         handlers = [
-            Base
+            Base,
+            Items
         ]
 
         hooks = [
