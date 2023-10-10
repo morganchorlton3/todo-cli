@@ -16,12 +16,10 @@ CONFIG['todo']['db_file'] = '~/.todo/db.json'
 
 
 def extend_tinydb(app):
-    app.log.info('extending todo application with tinydb')
     db_file = app.config.get('todo', 'db_file')
 
     # ensure that we expand the full path
     db_file = fs.abspath(db_file)
-    app.log.info('tinydb database file is: %s' % db_file)
 
     # ensure our parent directory exists
     db_dir = os.path.dirname(db_file)

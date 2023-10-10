@@ -9,9 +9,13 @@ class Items(Controller):
         stacked_type = 'embedded'
         stacked_on = 'base'
 
+
     @ex(help='list items')
     def list(self):
-        pass
+        data = {}
+        data['items'] = self.app.db.all()
+        self.app.render(data, 'items/list.jinja2')
+
 
     @ex(
         help='create an item',
