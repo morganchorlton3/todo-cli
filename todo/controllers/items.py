@@ -38,9 +38,31 @@ class Items(Controller):
 
         self.app.db.insert(item)
 
-    @ex(help='update an existing item')
+    @ex(
+        help='update an existing item',
+        arguments=[
+            (['item_id'],
+             {'help': 'todo item database id',
+              'action': 'store'}),
+            (['--text'],
+             {'help': 'todo item text',
+              'action': 'store',
+              'dest': 'item_text'}),
+        ],
+    )
     def update(self):
-        pass
+        id = int(self.app.pargs.item_id)
+        text = self.app.pargs.item_text
+        now = strftime("%Y-%m-%d %H:%M:%S")
+        self.app.log.info('updating todo item: %s - %s' % (id, text))
+
+        item = {
+            'timestamp': now,
+            'text': text,
+        }
+
+        self.app.db.update(item, doc_ids=[id])
+
 
     @ex(help='delete an item')
     def delete(self):
