@@ -44,3 +44,9 @@ log.colorlog:
 
 ### The maximum number of log files to maintain when rotating
 # max_files: 4
+
+---
+todo:
+
+### Database file path
+# db_file: ~/.todo/db.json
