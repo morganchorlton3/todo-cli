@@ -68,6 +68,34 @@ class Items(Controller):
     def delete(self):
         pass
 
-    @ex(help='complete an item')
+    @ex(
+        help='complete an item',
+        arguments=[
+            (['item_id'],
+             {'help': 'todo item database id',
+              'action': 'store'}),
+        ],
+    )
     def complete(self):
-        pass
+        id = int(self.app.pargs.item_id)
+        now = strftime("%Y-%m-%d %H:%M:%S")
+        item = self.app.db.get(doc_id=id)
+        item['timestamp'] = now
+        item['state'] = 'complete'
+
+        self.app.log.info('completing todo item: %s - %s' % (id, item['text']))
+        self.app.db.update(item, doc_ids=[id])
+
+        ### send an email message
+
+        msg = """
+            Congratulations! The following item has been completed:
+
+            %s - %s
+            """ % (id, item['text'])
+
+        self.app.mail.send(msg,
+                           subject='TODO Item Complete',
+                           to=[self.app.config.get('todo', 'email')],
+                           from_addr='noreply@localhost',
+                           )

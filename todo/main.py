@@ -13,6 +13,7 @@ from cement.utils import fs
 # configuration defaults
 CONFIG = init_defaults('todo')
 CONFIG['todo']['db_file'] = '~/.todo/db.json'
+CONFIG['todo']['email'] = 'morganchorlton3@gmail.com'
 
 
 def extend_tinydb(app):
